@@ -1,7 +1,6 @@
 import pygame
 import sys
 import math
-import os
 import random
 from time import time
 
@@ -26,10 +25,9 @@ small_font = pygame.font.SysFont("arial", 24)
 
 # ===== LOAD IMAGES =====
 def load_img(path, size=(PLAYER_SIZE, PLAYER_SIZE)):
-    if os.path.exists(path):
+    try:
         return pygame.transform.scale(pygame.image.load(path), size)
-    else:
-        print(f"Imagem {path} não encontrada")
+    except:
         surf = pygame.Surface(size)
         surf.fill((255,0,255))
         return surf
@@ -43,27 +41,17 @@ cloud_img = load_img("cloud.png", (100, 60))
 def load_sound(path):
     try:
         return pygame.mixer.Sound(path)
-    except Exception as e:
-        print(f"Erro som: {path} | {e}")
+    except:
         return None
 
 try:
     pygame.mixer.music.load("music.wav")
     pygame.mixer.music.set_volume(0.3)
     pygame.mixer.music.play(-1)
-except Exception as e:
-    print("Erro música:", e)
+except:
+    print("Erro música")
 
 point_sound = load_sound("mogged.wav")
-
-# ===== JOYSTICK =====
-pygame.joystick.init()
-joysticks = []
-for i in range(pygame.joystick.get_count()):
-    j = pygame.joystick.Joystick(i)
-    j.init()
-    joysticks.append(j)
-    print(j.get_name(), "| axes:", j.get_numaxes(), "buttons:", j.get_numbuttons(), "hats:", j.get_numhats())
 
 # ===== GAME VARS =====
 p1 = [200, 350]
@@ -77,8 +65,6 @@ net = pygame.Rect(WIDTH//2-5, HEIGHT-180, 10, 180)
 score1 = 0
 score2 = 0
 state = "menu"
-last_start = False
-last_select = False
 last_skill = 0
 cpu = True
 clouds = [[random.randint(0, WIDTH), random.randint(0,150)] for _ in range(5)]
@@ -113,7 +99,7 @@ def skill(power, lift):
 
 # ===== MENU =====
 def draw_menu(selected):
-    screen.fill((100,150,255))  # céu azul
+    screen.fill((135,206,235))  # céu azul
     screen.blit(font.render("Blaze Vôlei", True, (255,255,255)), (WIDTH//2 - 120, 100))
     for i, text in enumerate(["Jogar contra CPU", "Jogar Player 2"]):
         color = (255,0,0) if i==selected else (0,0,0)
@@ -197,8 +183,8 @@ while running:
         continue
 
     # GAME
-    # Fundo
-    screen.fill((100,150,255))  # céu azul
+    # Fundo céu
+    screen.fill((135,206,235))  # azul céu
     # Nuvens
     for cloud in clouds:
         screen.blit(cloud_img, cloud)
@@ -213,25 +199,26 @@ while running:
     if keys[pygame.K_a]: p1[0] -= VEL
     if keys[pygame.K_d]: p1[0] += VEL
     if keys[pygame.K_w] and p1[1]>=350: p1_y=-JUMP
-    if keys[pygame.K_s]:
-        p1[0] += VEL  # acelera para frente
+    if keys[pygame.K_s]: p1[0] += VEL  # acelera
     if keys[pygame.K_e]: skill(5,5)
     if keys[pygame.K_f]: skill(10,2)
     if keys[pygame.K_t]: skill(3,8)
     if keys[pygame.K_g]: skill(15,0)
 
-    # PLAYER 2
+    # PLAYER 2 ou CPU
     if not cpu:
         if keys[pygame.K_LEFT]: p2[0] -= VEL
         if keys[pygame.K_RIGHT]: p2[0] += VEL
         if keys[pygame.K_UP] and p2[1]>=350: p2_y=-JUMP
-        if keys[pygame.K_DOWN]:
-            p2[0] += VEL  # acelera
+        if keys[pygame.K_DOWN]: p2[0] += VEL
     else:
-        # CPU simples
-        if p2[0] < ball[0]: p2[0] += VEL
-        if p2[0] > ball[0]: p2[0] -= VEL
-        if p2[1]>=350 and ball[1]<300: p2_y=-JUMP
+        # CPU mais inteligente
+        target_x = ball[0]
+        if abs(p2[0]-target_x) > 5:
+            p2[0] += VEL if p2[0] < target_x else -VEL
+        # Salto se bola acima
+        if p2[1]>=350 and ball[1]<p2[1]-40 and ball[0] > WIDTH//2:
+            p2_y = -JUMP
 
     # LIMITES
     p1[0] = max(0, min(p1[0], WIDTH//2 - PLAYER_SIZE))
