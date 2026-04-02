@@ -1,0 +1,66 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    border: 2px solid #fff;
+    background: #111;
+    max-width: 100vw;
+    max-height: 100vh;
+    image-rendering: pixelated;
+    cursor: none;
+}
+
+#gameCanvas:focus {
+    outline: none;
+}
+
+.ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    color: white;
+    font-size: 24px;
+    text-shadow: 2px 2px 4px #000;
+}
+
+.button {
+    pointer-events: all;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid #fff;
+    color: white;
+    padding: 15px 30px;
+    font-size: 20px;
+    cursor: pointer;
+    margin: 10px;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.button:hover {
+    background: rgba(255,255,255,0.4);
+    transform: scale(1.05);
+}
+
+@media (max-width: 1200px) {
+    #gameCanvas {
+        width: 100vw;
+        height: 50vw;
+        max-height: 600px;
+    }
+}
